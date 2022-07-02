@@ -47,9 +47,10 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 public class BigWarpActions
 {
-	public static final String LANDMARK_MODE_ON  = "landmark mode on";
-	public static final String LANDMARK_MODE_OFF  = "landmark mode off";
 	public static final String TOGGLE_LANDMARK_MODE  = "landmark mode toggle";
+
+	public static final String[] TOGGLE_LANDMARK_MODE_KEYS = { "SPACE" };
+
 
 	public static final String TOGGLE_POINTS_VISIBLE  = "toggle points visible";
 	public static final String TOGGLE_POINT_NAMES_VISIBLE  = "toggle point names visible";
@@ -57,55 +58,113 @@ public class BigWarpActions
 	public static final String TOGGLE_BOX_AND_TEXT_OVERLAY_VISIBLE  = "toggle box and text overlay visible";
 	public static final String ESTIMATE_WARP = "estimate warp";
 	public static final String PRINT_TRANSFORM = "print transform";
-	public static final String TOGGLE_ESTIMATE_WARP_ONDRAG = "toggle estimate warp on drag";
+
+	public static final String[] TOGGLE_POINTS_VISIBLE_KEYS = { "V" };
+	public static final String[] TOGGLE_POINT_NAMES_VISIBLE_KEYS = { "N" };
+	public static final String[] TOGGLE_MOVING_IMAGE_DISPLAY_KEYS = { "T" };
+	public static final String[] TOGGLE_BOX_AND_TEXT_OVERLAY_VISIBLE_KEYS = { "F8" };
+	public static final String[] ESTIMATE_WARP_KEYS = { "C" };
+	public static final String[] PRINT_TRANSFORM_KEYS = { "control shift T" };
+
 
 	public static final String SHOW_WARPTYPE_DIALOG = "show warp vis dialog" ;
 	public static final String SET_WARPTYPE_VIS = "set warp vis type %s" ;
-	public static final String SET_WARPTYPE_VIS_P = "p " + SET_WARPTYPE_VIS;
-	public static final String SET_WARPTYPE_VIS_Q = "q " + SET_WARPTYPE_VIS;
+	public static final String SET_WARPTYPE_VIS_P = "p " + SET_WARPTYPE_VIS; // TODO variants
+	public static final String SET_WARPTYPE_VIS_Q = "q " + SET_WARPTYPE_VIS; // TODO variants
 
-	public static final String WARPMAG_BASE = "set warpmag base %s";
-	public static final String WARPVISGRID = "set warp vis grid %s";
-	public static final String WARPVISDIALOG = "warp vis dialog";
+	public static final String[] SHOW_WARPTYPE_DIALOG_KEYS = { "U" };
+	// TODO SET_WARPTYPE_VIS_P_KEYS variants
+	// TODO SET_WARPTYPE_VIS_Q_KEYS variants
+
+	public static final String WARPMAG_BASE = "set warpmag base %s"; // TODO variants
+	public static final String WARPVISGRID = "set warp vis grid %s"; // TODO variants
+
 
 	public static final String RESET_VIEWER = "reset active viewer";
-	public static final String ALIGN_VIEW_TRANSFORMS = "align view transforms %s";
+	public static final String ALIGN_VIEW_TRANSFORMS = "align view transforms %s"; // TODO variants
 	public static final String BRIGHTNESS_SETTINGS = "brightness settings";
-	public static final String VISIBILITY_AND_GROUPING = "visibility and grouping %s";
+	public static final String VISIBILITY_AND_GROUPING = "visibility and grouping %s"; // TODO variants
 	public static final String SHOW_HELP = "help";
 	public static final String SHOW_SOURCE_INFO = "show source info";
 
-	public static final String CROP = "crop";
+	public static final String[] RESET_VIEWER_KEYS = { "R" };
+	// TODO ALIGN_VIEW_TRANSFORMS_KEYS variants
+	public static final String[] BRIGHTNESS_SETTINGS_KEYS = { "S" };
+	// TODO VISIBILITY_AND_GROUPING_KEYS variants
+	public static final String[] SHOW_HELP_KEYS = { "F1", "H" };
+	public static final String[] SHOW_SOURCE_INFO_KEYS = { "not mapped" };
+
+
 	public static final String SAVE_SETTINGS = "save settings";
 	public static final String LOAD_SETTINGS = "load settings";
 	public static final String LOAD_LANDMARKS = "load landmarks";
 	public static final String SAVE_LANDMARKS = "save landmarks";
 	public static final String QUICK_SAVE_LANDMARKS = "quick save landmarks";
 
+	public static final String[] SAVE_SETTINGS_KEYS = { "not mapped" };
+	public static final String[] LOAD_SETTINGS_KEYS = { "not mapped" };
+	public static final String[] LOAD_LANDMARKS_KEYS ={ "control O" };
+	public static final String[] SAVE_LANDMARKS_KEYS ={ "control S" };
+	public static final String[] QUICK_SAVE_LANDMARKS_KEYS ={ "control Q" };
+
+
 	public static final String LANDMARK_GRID_DIALOG = "landmark grid dialog";
+
+	public static final String[] LANDMARK_GRID_DIALOG_KEYS = { "not mapped" };
+
 
 	public static final String SAVE_WARPED = "save warped";
 	public static final String SAVE_WARPED_XML = "save warped xml";
 
+	public static final String[] SAVE_WARPED_KEYS = { "not mapped" };
+	public static final String[] SAVE_WARPED_XML_KEYS = { "control shift E" };
+
+
 	public static final String EXPORT_IP = "export imageplus";
-	public static final String EXPORT_WARP = "export warp field"; 
-	public static final String EXPORT_AFFINE = "export affine"; 
+	public static final String EXPORT_WARP = "export warp field";
+	public static final String EXPORT_AFFINE = "export affine";
+
+	public static final String[] EXPORT_IP_KEYS = { "control E" };
+	public static final String[] EXPORT_WARP_KEYS = { "ctrl W" };
+	public static final String[] EXPORT_AFFINE_KEYS = { "ctrl A" };
+
 
 	public static final String WARP_TO_SELECTED_POINT = "warp to selected landmark";
-	public static final String WARP_TO_NEXT_POINT = "warp to next landmark %s";
+	public static final String WARP_TO_NEXT_POINT = "warp to next landmark %s"; // TODO variants
 	public static final String WARP_TO_NEAREST_POINT = "warp to nearest landmark";
+
+	public static final String[] WARP_TO_SELECTED_POINT_KEYS = { "D" };
+	// TODO WARP_TO_NEXT_POINT_KEYS variants
+	public static final String[] WARP_TO_NEAREST_POINT_KEYS = { "E" };
+
 
 	public static final String SET_BOOKMARK = "set bookmark";
 	public static final String GO_TO_BOOKMARK = "go to bookmark";
 	public static final String GO_TO_BOOKMARK_ROTATION = "go to bookmark rotation";
 
+	public static final String[] SET_BOOKMARK_KEYS = { "shift B" };
+	public static final String[] GO_TO_BOOKMARK_KEYS = { "B" };
+	public static final String[] GO_TO_BOOKMARK_ROTATION_KEYS = { "O" };
+
+
 	public static final String UNDO = "undo";
 	public static final String REDO = "redo";
 
-	public static final String SELECT_TABLE_ROWS = "select table row %d";
+	public static final String[] UNDO_KEYS = { "control Z" };
+	public static final String[] REDO_KEYS = { "control Y",  "control shift Z" };
+
+
+	public static final String SELECT_TABLE_ROWS_MINUS_ONE = "select table row -1";
+
+	public static final String[] SELECT_TABLE_ROWS_MINUS_ONE_KEYS = { "shift ESCAPE" };
+
 
 	public static final String DEBUG = "debug";
 	public static final String GARBAGE_COLLECTION = "garbage collection";
+
+	public static final String[] DEBUG_KEYS = { "F11" };
+	public static final String[] GARBAGE_COLLECTION_KEYS = { "F9" };
+
 
 	/**
 	 * Create BigWarp actions and install them in the specified
@@ -118,6 +177,7 @@ public class BigWarpActions
 	 * @param keyProperties
 	 *            user-defined key-bindings.
 	 */
+	@Deprecated
 	public static void installActionBindings(
 			final InputActionBindings inputActionBindings,
 			final BigWarp< ? > bw,
@@ -129,7 +189,8 @@ public class BigWarpActions
 		inputActionBindings.addActionMap( "bwv", createActionMapViewer( bw ) );
 		inputActionBindings.addInputMap( "bwv", createInputMapViewer( keyProperties ) );
 	}
-	
+
+	@Deprecated
 	public static void installLandmarkPanelActionBindings(
 			final InputActionBindings inputActionBindings,
 			final BigWarp< ? > bw,
@@ -138,7 +199,7 @@ public class BigWarpActions
 	{
 		inputActionBindings.addActionMap( "bw", createActionMap( bw ) );
 		inputActionBindings.addInputMap( "bw", createInputMap( keyProperties ) );
-		
+
 		TableCellEditor celled = landmarkTable.getCellEditor( 0, 1 );
 		Component c = celled.getTableCellEditorComponent(landmarkTable, Boolean.TRUE, true, 0, 1 );
 
@@ -156,28 +217,28 @@ public class BigWarpActions
 		final InputMap inputMap = new InputMap();
 		final KeyStrokeAdder map = keyProperties.keyStrokeAdder( inputMap );
 
-		map.put(RESET_VIEWER, "R");
-		
+		map.put(RESET_VIEWER, RESET_VIEWER_KEYS);
+
 		map.put( String.format( VISIBILITY_AND_GROUPING, "moving" ), "F3" );
 		map.put( String.format( VISIBILITY_AND_GROUPING, "target" ), "F4" );
 		map.put( "transform type", "F2" );
-		
+
 		map.put( String.format( ALIGN_VIEW_TRANSFORMS, AlignViewerPanelAction.TYPE.OTHER_TO_ACTIVE ), "Q" );
 		map.put( String.format( ALIGN_VIEW_TRANSFORMS, AlignViewerPanelAction.TYPE.ACTIVE_TO_OTHER ), "W" );
 
-		map.put( TOGGLE_MOVING_IMAGE_DISPLAY, "T" );
+		map.put( TOGGLE_MOVING_IMAGE_DISPLAY, TOGGLE_MOVING_IMAGE_DISPLAY_KEYS );
 
-		map.put( WARP_TO_SELECTED_POINT, "D" );
+		map.put( WARP_TO_SELECTED_POINT, WARP_TO_SELECTED_POINT_KEYS );
 		map.put( String.format( WARP_TO_NEXT_POINT, true), "ctrl D" );
 		map.put( String.format( WARP_TO_NEXT_POINT, false), "ctrl shift D" );
-		map.put( WARP_TO_NEAREST_POINT, "E" );
+		map.put( WARP_TO_NEAREST_POINT, WARP_TO_NEAREST_POINT_KEYS );
 
-		map.put( EXPORT_WARP, "ctrl W" );
-		map.put( EXPORT_AFFINE, "ctrl A" );
+		map.put( EXPORT_WARP, EXPORT_WARP_KEYS );
+		map.put( EXPORT_AFFINE, EXPORT_AFFINE_KEYS );
 
-		map.put( GO_TO_BOOKMARK, "B" );
-		map.put( GO_TO_BOOKMARK_ROTATION, "O" );
-		map.put( SET_BOOKMARK, "shift B" );
+		map.put( SET_BOOKMARK, SET_BOOKMARK_KEYS );
+		map.put( GO_TO_BOOKMARK, GO_TO_BOOKMARK_KEYS );
+		map.put( GO_TO_BOOKMARK_ROTATION, GO_TO_BOOKMARK_ROTATION_KEYS );
 
 		return inputMap;
 	}
@@ -223,58 +284,32 @@ public class BigWarpActions
 		final InputMap inputMap = new InputMap();
 		final KeyStrokeAdder map = keyProperties.keyStrokeAdder( inputMap );
 
-		map.put( SHOW_WARPTYPE_DIALOG, "U" );
-		map.put( TOGGLE_LANDMARK_MODE, "SPACE" );
+		map.put( SHOW_WARPTYPE_DIALOG, SHOW_WARPTYPE_DIALOG_KEYS );
+		map.put( TOGGLE_LANDMARK_MODE, TOGGLE_LANDMARK_MODE_KEYS );
 
-//		map.put( LANDMARK_MODE_ON, "pressed SPACE" );
-//		// the few lines below are super ugly, but are necessary for robustness
-//		map.put( LANDMARK_MODE_ON, "shift pressed SPACE" );
-//		map.put( LANDMARK_MODE_ON, "ctrl pressed SPACE" );
-//		map.put( LANDMARK_MODE_ON, "alt pressed SPACE" );
-//		map.put( LANDMARK_MODE_ON, "alt ctrl pressed SPACE" );
-//		map.put( LANDMARK_MODE_ON, "alt shift pressed SPACE" );
-//		map.put( LANDMARK_MODE_ON, "ctrl shift pressed SPACE" );
-//		map.put( LANDMARK_MODE_ON, "alt ctrl shift pressed SPACE" );
-//
-//		map.put( LANDMARK_MODE_OFF, "released SPACE", "released" );
-//		// the few lines below are super ugly, but are necessary for robustness
-//		map.put( LANDMARK_MODE_OFF, "shift released SPACE", "released" );
-//		map.put( LANDMARK_MODE_OFF, "ctrl released SPACE", "released" );
-//		map.put( LANDMARK_MODE_OFF, "alt released SPACE", "released" );
-//		map.put( LANDMARK_MODE_OFF, "alt ctrl released SPACE", "released" );
-//		map.put( LANDMARK_MODE_OFF, "alt shift released SPACE", "released" );
-//		map.put( LANDMARK_MODE_OFF, "ctrl shift released SPACE", "released" );
-//		map.put( LANDMARK_MODE_OFF, "alt ctrl shift released SPACE", "released" );
+		map.put( BRIGHTNESS_SETTINGS, BRIGHTNESS_SETTINGS_KEYS );
+		map.put( SHOW_HELP, SHOW_HELP_KEYS );
 
-		map.put( BRIGHTNESS_SETTINGS, "S" );
-		map.put( SHOW_HELP, "F1", "H" );
+		map.put( TOGGLE_POINTS_VISIBLE, TOGGLE_POINTS_VISIBLE_KEYS );
+		map.put( TOGGLE_POINT_NAMES_VISIBLE, TOGGLE_POINT_NAMES_VISIBLE_KEYS );
+		map.put( ESTIMATE_WARP, ESTIMATE_WARP_KEYS );
 
-		map.put( TOGGLE_POINTS_VISIBLE, "V" );
-		map.put( TOGGLE_POINT_NAMES_VISIBLE, "N" );
-		map.put( ESTIMATE_WARP, "C" );
+		map.put( UNDO, UNDO_KEYS );
+		map.put( REDO, REDO_KEYS );
 
-		map.put( UNDO, "control Z" );
-		map.put( REDO, "control Y" );
-		map.put( REDO, "control shift Z" );
+		map.put( SAVE_LANDMARKS, SAVE_LANDMARKS_KEYS );
+		map.put( QUICK_SAVE_LANDMARKS, QUICK_SAVE_LANDMARKS_KEYS );
+		map.put( LOAD_LANDMARKS, LOAD_LANDMARKS_KEYS );
 
-		map.put( SAVE_LANDMARKS, "control S" );
-		map.put( QUICK_SAVE_LANDMARKS, "control Q" );
-		map.put( LOAD_LANDMARKS, "control O" );
+		map.put( EXPORT_IP, EXPORT_IP_KEYS );
+		map.put( SAVE_WARPED_XML, SAVE_WARPED_XML_KEYS );
 
-		map.put( EXPORT_IP, "control E" );
-//		map.put( SAVE_WARPED, "control alt shift E" );
-		map.put( SAVE_WARPED_XML, "control shift E" );
+		map.put( SELECT_TABLE_ROWS_MINUS_ONE, SELECT_TABLE_ROWS_MINUS_ONE_KEYS );
 
-//		map.put( LandmarkPointMenu.CLEAR_SELECTED_MOVING, "BACK_SPACE" );
-//		map.put( LandmarkPointMenu.CLEAR_SELECTED_FIXED, "control BACK_SPACE" );
-//		map.put( LandmarkPointMenu.DELETE_SELECTED, "DELETE" );
-
-		map.put(  String.format( SELECT_TABLE_ROWS, -1 ), "shift ESCAPE" );
-
-		map.put( TOGGLE_BOX_AND_TEXT_OVERLAY_VISIBLE, "F8" );
-		map.put( GARBAGE_COLLECTION, "F9" );
-		map.put( PRINT_TRANSFORM, "control shift T" );
-		map.put( DEBUG, "F11" );
+		map.put( TOGGLE_BOX_AND_TEXT_OVERLAY_VISIBLE, TOGGLE_BOX_AND_TEXT_OVERLAY_VISIBLE_KEYS );
+		map.put( GARBAGE_COLLECTION, GARBAGE_COLLECTION_KEYS );
+		map.put( PRINT_TRANSFORM, PRINT_TRANSFORM_KEYS );
+		map.put( DEBUG, DEBUG_KEYS );
 
 		return inputMap;
 	}
@@ -282,23 +317,6 @@ public class BigWarpActions
 	public static ActionMap createActionMap( final BigWarp< ? > bw )
 	{
 		final ActionMap actionMap = new ActionMap();
-
-		/*
-		 * The below two lines with ui-behavior-1.6.- or so
-		 */
-//		new LandmarkModeAction( LANDMARK_MODE_ON, bw, true ).put( actionMap );
-//		new LandmarkModeAction( LANDMARK_MODE_OFF, bw, false ).put( actionMap );
-
-//		new ToggleLandmarkModeAction( LANDMARK_MODE_ON, bw ).put( actionMap );
-//		new ToggleLandmarkModeAction( LANDMARK_MODE_OFF, bw ).put( actionMap );
-
-
-//		bw.landmarkPopupMenu.deleteSelectedHandler.put( actionMap );
-//		bw.landmarkPopupMenu.activateAllHandler.put( actionMap );
-//		bw.landmarkPopupMenu.deactivateAllHandler.put( actionMap );
-//
-//		bw.landmarkPopupMenu.clearAllMoving.put( actionMap );
-//		bw.landmarkPopupMenu.clearAllFixed.put( actionMap );
 
 		new ToggleLandmarkModeAction( TOGGLE_LANDMARK_MODE, bw ).put( actionMap );
 
@@ -334,7 +352,7 @@ public class BigWarpActions
 		new UndoRedoAction( UNDO, bw ).put( actionMap );
 		new UndoRedoAction( REDO, bw ).put( actionMap );
 
-		new TableSelectionAction( String.format( SELECT_TABLE_ROWS, -1 ), bw.getLandmarkPanel().getJTable(), -1 ).put( actionMap );
+		new TableSelectionAction( SELECT_TABLE_ROWS_MINUS_ONE, bw.getLandmarkPanel().getJTable(), -1 ).put( actionMap );
 
 		new GarbageCollectionAction( GARBAGE_COLLECTION ).put( actionMap );
 		new DebugAction( DEBUG, bw ).put( actionMap );
@@ -356,7 +374,7 @@ public class BigWarpActions
 		{
 			super( name );
 			this.bw = bw;
-			
+
 			isRedo = false;
 
 			if ( name.equals( REDO ) )
@@ -376,7 +394,7 @@ public class BigWarpActions
 			// I would love for this check to work instead of using a try-catch
 			// bug it doesn't seem to be consistent
 //			if( isRedo && manager.canRedo() ){
-			try { 
+			try {
 
 				if( isRedo )
 				{
@@ -460,7 +478,7 @@ public class BigWarpActions
 		}
 	}
 
-	public static class ToggleAlwaysEstimateTransformAction extends AbstractNamedAction 
+	public static class ToggleAlwaysEstimateTransformAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = 2909830484701853577L;
 
@@ -479,7 +497,7 @@ public class BigWarpActions
 		}
 	}
 
-	public static class GarbageCollectionAction extends AbstractNamedAction 
+	public static class GarbageCollectionAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = -4487441057212703143L;
 
@@ -495,13 +513,13 @@ public class BigWarpActions
 			System.gc();
 		}
 	}
-	
+
 	public static class PrintTransformAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = 6065343788485350279L;
 
 		private BigWarp< ? > bw;
- 
+
 		public PrintTransformAction( final String name, final BigWarp< ? > bw )
 		{
 			super( name );
@@ -539,7 +557,7 @@ public class BigWarpActions
 			// System.out.println( ltm.getChangedSinceWarp() );
 //			 System.out.println( ltm.getWarpedPoints() );
 //			ltm.printWarpedPoints();
-			
+
 			AffineTransform3D xfm = new AffineTransform3D();
 			bw.viewerP.state().getViewerTransform( xfm );
 			System.out.println( "mvg xfm " + xfm  + "   DET = " + BigWarpUtils.det( xfm ));
@@ -564,7 +582,7 @@ public class BigWarpActions
 			System.out.println( " " );
 		}
 	}
-	
+
 	public static class EstimateWarpAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = -210012348709096037L;
@@ -583,13 +601,13 @@ public class BigWarpActions
 			bw.restimateTransformation();
 		}
 	}
-	
+
 	public static class ToggleMovingImageDisplayAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = 6495981071796613953L;
-		
+
 		private BigWarp< ? > bw;
-		
+
 		public ToggleMovingImageDisplayAction( final String name, final BigWarp< ? > bw )
 		{
 			super( name );
@@ -602,7 +620,7 @@ public class BigWarpActions
 			bw.toggleMovingImageDisplay();
 		}
 	}
-	
+
 	public static class TogglePointNameVisibleAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = 2639535533224809586L;
@@ -618,7 +636,7 @@ public class BigWarpActions
 		@Override
 		public void actionPerformed( ActionEvent e )
 		{
-			bw.toggleNameVisibility();	
+			bw.toggleNameVisibility();
 		}
 	}
 
@@ -650,7 +668,7 @@ public class BigWarpActions
 	{
 		private static final long serialVersionUID = 8747830204501341125L;
 		private BigWarp< ? > bw;
-		
+
 		public TogglePointsVisibleAction( final String name, final BigWarp< ? > bw )
 		{
 			super( name );
@@ -660,44 +678,44 @@ public class BigWarpActions
 		@Override
 		public void actionPerformed( ActionEvent e )
 		{
-			bw.togglePointVisibility();	
+			bw.togglePointVisibility();
 		}
 	}
-	
+
 	public static class ResetActiveViewerAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = -130575800163574517L;
-		
+
 		private BigWarp< ? > bw;
-		
+
 		public ResetActiveViewerAction( final BigWarp< ? > bw )
 		{
 			super( String.format( RESET_VIEWER ) );
 			this.bw = bw;
 		}
-		
+
 		public void actionPerformed( ActionEvent e )
 		{
 			bw.resetView();
 		}
 	}
-	
+
 	public static class AlignViewerPanelAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = -7023242695323421450L;
-		
+
 		public enum TYPE { ACTIVE_TO_OTHER, OTHER_TO_ACTIVE };
-		
+
 		private BigWarp< ? >bw;
 		private TYPE type;
-		
+
 		public AlignViewerPanelAction( final BigWarp< ? > bw, TYPE type )
 		{
 			super( String.format( ALIGN_VIEW_TRANSFORMS, type ) );
 			this.bw = bw;
 			this.type = type;
 		}
-		
+
 		public void actionPerformed( ActionEvent e )
 		{
 			if( type == TYPE.ACTIVE_TO_OTHER )
@@ -710,10 +728,10 @@ public class BigWarpActions
 	public static class SetWarpMagBaseAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = 7370813069619338918L;
-		
+
 		private BigWarp< ? > bw;
 		private int i;
-		
+
 		public SetWarpMagBaseAction( final String name, final BigWarp< ? > bw, int i )
 		{
 			super( name );
@@ -727,14 +745,14 @@ public class BigWarpActions
 			bw.setWarpMagBaselineIndex( i );
 		}
 	}
-	
+
 	public static class SetWarpVisGridTypeAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = 7370813069619338918L;
-		
+
 		private final BigWarp< ? > bw;
 		private final GridSource.GRID_TYPE type;
-		
+
 		public SetWarpVisGridTypeAction( final String name, final BigWarp< ? > bw, final GridSource.GRID_TYPE type )
 		{
 			super( name );
@@ -748,20 +766,20 @@ public class BigWarpActions
 			bw.setWarpVisGridType( type );
 		}
 	}
-	
+
 	public static class SetWarpVisTypeAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = 7370813069619338918L;
-		
+
 		private BigWarp< ? > bw;
 		private BigWarpViewerFrame p;
 		private BigWarp.WarpVisType type;
-		
+
 		public SetWarpVisTypeAction( final BigWarp.WarpVisType type, final BigWarp< ? > bw )
 		{
 			this( type, bw, null );
 		}
-		
+
 		public SetWarpVisTypeAction( final BigWarp.WarpVisType type, final BigWarp< ? > bw, BigWarpViewerFrame p )
 		{
 			super( getName( type, p ));
@@ -778,7 +796,7 @@ public class BigWarpActions
 			else
 				bw.setWarpVisMode( type, p, false );
 		}
-		
+
 		public static String getName( final BigWarp.WarpVisType type, BigWarpViewerFrame p )
 		{
 			if( p == null )
@@ -789,7 +807,7 @@ public class BigWarpActions
 				return String.format( SET_WARPTYPE_VIS_Q, type.name() );
 		}
 	}
-	
+
 	public static class TableSelectionAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = -4647679094757721276L;
@@ -1070,7 +1088,7 @@ public class BigWarpActions
 			bw.exportAsImagePlus( false );
 		}
 	}
-	
+
 	public static class ExportWarpAction extends AbstractNamedAction
 	{
 		private static final long serialVersionUID = 4626378501415886468L;
