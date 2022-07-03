@@ -33,6 +33,7 @@ import javax.swing.table.TableCellEditor;
 
 import org.scijava.ui.behaviour.KeyStrokeAdder;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
+import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.InputActionBindings;
 
 import bdv.gui.BigWarpViewerFrame;
@@ -44,6 +45,8 @@ import bigwarp.source.GridSource;
 import bigwarp.util.BigWarpUtils;
 import mpicbg.models.AbstractModel;
 import net.imglib2.realtransform.AffineTransform3D;
+
+import static bdv.BigDataViewerActions.toggleDialogAction;
 
 public class BigWarpActions
 {
@@ -167,6 +170,27 @@ public class BigWarpActions
 
 
 	/**
+	 * Create BigDataViewer actions and install them in the specified
+	 * {@link Actions}.
+	 *
+	 * @param actions
+	 *            navigation actions are installed here.
+	 * @param bw
+	 *            Actions are targeted at this {@link BigWarp}.
+	 */
+	public static void install( final Actions actions, final BigWarp< ? > bw )
+	{
+		actions.runnableAction( () -> bw.setInLandmarkMode( !bw.inLandmarkMode ), TOGGLE_LANDMARK_MODE, TOGGLE_LANDMARK_MODE_KEYS );
+
+		toggleDialogAction( actions, bw.warpVisDialog, SHOW_WARPTYPE_DIALOG, SHOW_WARPTYPE_DIALOG_KEYS );
+		toggleDialogAction( actions, bw.brightnessDialog, BRIGHTNESS_SETTINGS, BRIGHTNESS_SETTINGS_KEYS );
+		toggleDialogAction( actions, bw.helpDialog, SHOW_HELP, SHOW_HELP_KEYS );
+		toggleDialogAction( actions, bw.sourceInfoDialog, SHOW_SOURCE_INFO, SHOW_SOURCE_INFO_KEYS );
+
+		actions.runnableAction( bw::togglePointVisibility,TOGGLE_POINTS_VISIBLE, TOGGLE_POINTS_VISIBLE_KEYS );
+	}
+
+	/**
 	 * Create BigWarp actions and install them in the specified
 	 * {@link InputActionBindings}.
 	 *
@@ -284,13 +308,6 @@ public class BigWarpActions
 		final InputMap inputMap = new InputMap();
 		final KeyStrokeAdder map = keyProperties.keyStrokeAdder( inputMap );
 
-		map.put( SHOW_WARPTYPE_DIALOG, SHOW_WARPTYPE_DIALOG_KEYS );
-		map.put( TOGGLE_LANDMARK_MODE, TOGGLE_LANDMARK_MODE_KEYS );
-
-		map.put( BRIGHTNESS_SETTINGS, BRIGHTNESS_SETTINGS_KEYS );
-		map.put( SHOW_HELP, SHOW_HELP_KEYS );
-
-		map.put( TOGGLE_POINTS_VISIBLE, TOGGLE_POINTS_VISIBLE_KEYS );
 		map.put( TOGGLE_POINT_NAMES_VISIBLE, TOGGLE_POINT_NAMES_VISIBLE_KEYS );
 		map.put( ESTIMATE_WARP, ESTIMATE_WARP_KEYS );
 
@@ -318,14 +335,6 @@ public class BigWarpActions
 	{
 		final ActionMap actionMap = new ActionMap();
 
-		new ToggleLandmarkModeAction( TOGGLE_LANDMARK_MODE, bw ).put( actionMap );
-
-		new ToggleDialogAction( SHOW_WARPTYPE_DIALOG, bw.warpVisDialog ).put( actionMap );
-
-		new ToggleDialogAction( BRIGHTNESS_SETTINGS, bw.brightnessDialog ).put( actionMap );
-		new ToggleDialogAction( SHOW_HELP, bw.helpDialog ).put( actionMap );
-		new ToggleDialogAction( SHOW_SOURCE_INFO, bw.sourceInfoDialog ).put( actionMap );
-
 		new SaveWarpedAction( bw ).put( actionMap );
 		new SaveWarpedXmlAction( bw ).put( actionMap );
 		new ExportImagePlusAction( bw ).put( actionMap );
@@ -338,7 +347,6 @@ public class BigWarpActions
 
 		new LandmarkGridDialogAction( bw ).put( actionMap );
 
-		new TogglePointsVisibleAction( TOGGLE_POINTS_VISIBLE, bw ).put( actionMap );
 		new TogglePointNameVisibleAction( TOGGLE_POINT_NAMES_VISIBLE, bw ).put( actionMap );
 		new ToggleBoxAndTexOverlayVisibility( TOGGLE_BOX_AND_TEXT_OVERLAY_VISIBLE, bw ).put( actionMap );
 		new ToggleMovingImageDisplayAction( TOGGLE_MOVING_IMAGE_DISPLAY, bw ).put( actionMap );
@@ -432,49 +440,6 @@ public class BigWarpActions
 				//System.err.println( " Undo / redo error, or nothing to do " );
 				//ex.printStackTrace();
 			}
-		}
-	}
-
-	public static class LandmarkModeAction extends AbstractNamedAction
-	{
-		private static final long serialVersionUID = 4079013525930019558L;
-
-		private BigWarp< ? > bw;
-
-		private final boolean isOn;
-
-		public LandmarkModeAction( final String name, final BigWarp< ? > bw, final boolean on )
-		{
-			super( name );
-			this.bw = bw;
-			this.isOn = on;
-		}
-
-		@Override
-		public void actionPerformed( ActionEvent e )
-		{
-//			System.out.println( "LM MODE : " + isOn );
-			bw.setInLandmarkMode( isOn );
-		}
-	}
-
-	public static class ToggleLandmarkModeAction extends AbstractNamedAction
-	{
-		private static final long serialVersionUID = 234323425930019L;
-
-		private BigWarp< ? > bw;
-
-		public ToggleLandmarkModeAction( final String name, final BigWarp< ? > bw )
-		{
-			super( name );
-			this.bw = bw;
-		}
-
-		@Override
-		public void actionPerformed( ActionEvent e )
-		{
-//			System.out.println( "TOGGLE LM MODE" );
-			bw.setInLandmarkMode( !bw.inLandmarkMode );
 		}
 	}
 
@@ -661,24 +626,6 @@ public class BigWarpActions
 			bw.getViewerFrameQ().getViewerPanel().toggleTextOverlayVisible();
 			bw.getViewerFrameP().repaint();
 			bw.getViewerFrameQ().repaint();
-		}
-	}
-
-	public static class TogglePointsVisibleAction extends AbstractNamedAction
-	{
-		private static final long serialVersionUID = 8747830204501341125L;
-		private BigWarp< ? > bw;
-
-		public TogglePointsVisibleAction( final String name, final BigWarp< ? > bw )
-		{
-			super( name );
-			this.bw = bw;
-		}
-
-		@Override
-		public void actionPerformed( ActionEvent e )
-		{
-			bw.togglePointVisibility();
 		}
 	}
 
