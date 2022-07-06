@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 2 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-2.0.html>.
@@ -21,10 +21,19 @@
  */
 package bigwarp;
 
+import bdv.KeyConfigContexts;
+import bdv.tools.PreferencesDialog;
+import bdv.ui.UIUtils;
+import bdv.ui.appearance.AppearanceManager;
+import bdv.ui.appearance.AppearanceSettingsPage;
+import bdv.ui.keymap.Keymap;
+import bdv.ui.keymap.KeymapManager;
+import bdv.ui.keymap.KeymapSettingsPage;
 import bdv.viewer.ConverterSetups;
 import bdv.viewer.DisplayMode;
 import bdv.viewer.TransformListener;
 import bdv.viewer.ViewerState;
+import dev.dirs.ProjectDirectories;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -83,6 +92,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.util.Actions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,6 +181,8 @@ import net.imglib2.type.numeric.real.FloatType;
 public class BigWarp< T >
 {
 
+	public static String configDir = ProjectDirectories.from( "sc", "fiji", "bigwarp" ).configDir;
+
 	protected static final int DEFAULT_WIDTH = 600;
 
 	protected static final int DEFAULT_HEIGHT = 400;
@@ -191,7 +203,7 @@ public class BigWarp< T >
 	protected int[] targetSourceIndexList;
 
 	protected List< SourceAndConverter< T > > sources;
-	
+
 	protected final SetupAssignments setupAssignments;
 
 	protected final BrightnessDialog brightnessDialog;
@@ -199,6 +211,12 @@ public class BigWarp< T >
 	protected final WarpVisFrame warpVisDialog;
 
 	protected final HelpDialog helpDialog;
+
+	private final KeymapManager keymapManager;
+
+	private final AppearanceManager appearanceManager;
+
+	protected final PreferencesDialog preferencesDialog;
 
 	protected final SourceInfoDialog sourceInfoDialog;
 
@@ -285,7 +303,7 @@ public class BigWarp< T >
 	private BoundingBoxEstimation bboxOptions;
 
 	private long keyClickMaxLength = 250;
-	
+
 	protected TransformTypeSelectDialog transformSelector;
 
 	protected AffineTransform3D tmpTransform = new AffineTransform3D();
@@ -399,19 +417,26 @@ public class BigWarp< T >
 
 		viewerSettings = new BigWarpViewerSettings();
 
+		final KeymapManager optionsKeymapManager = options.values.getKeymapManager();
+		final AppearanceManager optionsAppearanceManager = options.values.getAppearanceManager();
+		keymapManager = optionsKeymapManager != null ? optionsKeymapManager : new KeymapManager( configDir );
+		appearanceManager = optionsAppearanceManager != null ? optionsAppearanceManager : new AppearanceManager( configDir );
+
 		// key properties
-		final InputTriggerConfig keyProperties = BigDataViewer.getInputTriggerConfig( options );
-		options = options.inputTriggerConfig( keyProperties );
+		InputTriggerConfig keyProperties = options.values.getInputTriggerConfig();
+		final Keymap keymap = this.keymapManager.getForwardSelectedKeymap();
+		if ( keyProperties == null )
+			keyProperties = keymap.getConfig();
 
 		// Viewer frame for the moving image
 		viewerFrameP = new BigWarpViewerFrame( this, DEFAULT_WIDTH, DEFAULT_HEIGHT, (List)sources, converterSetups, viewerSettings,
-				data.cache, options, "Bigwarp moving image", true, movingSourceIndexList, targetSourceIndexList );
+				data.cache, options.inputTriggerConfig( keyProperties ), "Bigwarp moving image", true, movingSourceIndexList, targetSourceIndexList );
 
 		viewerP = getViewerFrameP().getViewerPanel();
 
 		// Viewer frame for the fixed image
 		viewerFrameQ = new BigWarpViewerFrame( this, DEFAULT_WIDTH, DEFAULT_HEIGHT, (List)sources, converterSetups, viewerSettings,
-				data.cache, options, "Bigwarp fixed image", false, movingSourceIndexList, targetSourceIndexList );
+				data.cache, options.inputTriggerConfig( keyProperties ), "Bigwarp fixed image", false, movingSourceIndexList, targetSourceIndexList );
 
 		viewerQ = getViewerFrameQ().getViewerPanel();
 
@@ -433,7 +458,7 @@ public class BigWarp< T >
 
 				final MultiBoxOverlayRenderer overlayRenderP = new MultiBoxOverlayRenderer( DEFAULT_WIDTH, DEFAULT_HEIGHT );
 				final MultiBoxOverlayRenderer overlayRenderQ = new MultiBoxOverlayRenderer( DEFAULT_WIDTH, DEFAULT_HEIGHT );
-				
+
 				// TODO hopefully I won't' need reflection any more
 				final Field boxField = overlayRenderP.getClass().getDeclaredField( "box" );
 				boxField.setAccessible( true );
@@ -474,7 +499,7 @@ public class BigWarp< T >
 		activeSourcesDialogP.setTitle( "visibility and grouping ( moving )" );
 		activeSourcesDialogQ = new VisibilityAndGroupingDialog( viewerFrameQ, viewerQ.getVisibilityAndGrouping() );
 		activeSourcesDialogQ.setTitle( "visibility and grouping ( fixed )" );
-		
+
 		// set warp mag source to inactive at the start
 		viewerP.state().setSourceActive( warpMagSource, false );
 		viewerQ.state().setSourceActive( warpMagSource, false );
@@ -513,13 +538,21 @@ public class BigWarp< T >
 		transformSelector = new TransformTypeSelectDialog( landmarkFrame, this );
 
 		// dialogs have to be constructed before action maps are made
-		warpVisDialog = new WarpVisFrame( viewerFrameQ, this ); 
+		warpVisDialog = new WarpVisFrame( viewerFrameQ, this );
 
-		WarpNavigationActions.installActionBindings( getViewerFrameP().getKeybindings(), viewerFrameP, keyProperties, ( ndims == 2 ) );
+		final Actions bwActionsP = new Actions( keyProperties, "bdv", "bw" );
+		bwActionsP.install( getViewerFrameP().getKeybindings(), "bwActionP" );
+		BigWarpActions.install( bwActionsP, this );
 		BigWarpActions.installActionBindings( getViewerFrameP().getKeybindings(), this, keyProperties );
+		// TODO...
+		WarpNavigationActions.installActionBindings( getViewerFrameP().getKeybindings(), viewerFrameP, keyProperties, ( ndims == 2 ) );
 
-		WarpNavigationActions.installActionBindings( getViewerFrameQ().getKeybindings(), viewerFrameQ, keyProperties, ( ndims == 2 ) );
+		final Actions bwActionsQ = new Actions( keyProperties, "bdv", "bw" );
+		bwActionsQ.install( getViewerFrameQ().getKeybindings(), "bwActionsQ" );
 		BigWarpActions.installActionBindings( getViewerFrameQ().getKeybindings(), this, keyProperties );
+		BigWarpActions.install( bwActionsQ, this );
+		// TODO...
+		WarpNavigationActions.installActionBindings( getViewerFrameQ().getKeybindings(), viewerFrameQ, keyProperties, ( ndims == 2 ) );
 
 		BigWarpActions.installLandmarkPanelActionBindings( landmarkFrame.getKeybindings(), this, landmarkTable, keyProperties );
 
@@ -592,6 +625,13 @@ public class BigWarp< T >
 		bookmarkEditorP = new BookmarksEditor( viewerP, viewerFrameP.getKeybindings(), bookmarks );
 		bookmarkEditorQ = new BookmarksEditor( viewerQ, viewerFrameQ.getKeybindings(), bookmarks );
 
+		preferencesDialog = new PreferencesDialog( viewerFrameP, keymap, new String[] { KeyConfigContexts.BIGDATAVIEWER } );
+		preferencesDialog.addPage( new AppearanceSettingsPage( "Appearance", appearanceManager ) );
+		preferencesDialog.addPage( new KeymapSettingsPage( "Keymap", this.keymapManager, this.keymapManager.getCommandDescriptions() ) );
+		appearanceManager.appearance().updateListeners().add( viewerFrameP::repaint );
+		appearanceManager.appearance().updateListeners().add( viewerFrameQ::repaint );
+		SwingUtilities.invokeLater(() -> appearanceManager.updateLookAndFeel());
+
 		// add landmark mode listener
 		//addKeyEventPostProcessor( new LandmarkModeListener() );
 	}
@@ -604,7 +644,7 @@ public class BigWarp< T >
 	/**
 	 * TODO Make a PR that updates this method in InitializeViewerState in bdv-core
 	 * @deprecated Use {@link InitializeViewerState} method instead.
-	 * 
+	 *
 	 * @param cumulativeMinCutoff the min image intensity
 	 * @param cumulativeMaxCutoff the max image intensity
 	 * @param state the viewer state
@@ -742,7 +782,7 @@ public class BigWarp< T >
 			final JMenuItem exportToImagePlus = new JMenuItem( actionMap.get( BigWarpActions.EXPORT_IP ) );
 			exportToImagePlus.setText( "Export moving image" );
 			fileMenu.add( exportToImagePlus );
-			
+
 			final JMenuItem exportWarpField = new JMenuItem( actionMap.get( BigWarpActions.EXPORT_WARP ) );
 			exportWarpField.setText( "Export warp field" );
 			fileMenu.add( exportWarpField );
@@ -796,7 +836,7 @@ public class BigWarp< T >
 		final JMenuItem exportToImagePlus = new JMenuItem( actionMap.get( BigWarpActions.EXPORT_IP ) );
 		exportToImagePlus.setText( "Export moving image" );
 		fileMenu.add( exportToImagePlus );
-		
+
 		final JMenuItem exportWarpField = new JMenuItem( actionMap.get( BigWarpActions.EXPORT_WARP ) );
 		exportWarpField.setText( "Export warp field" );
 		fileMenu.add( exportWarpField );
@@ -846,7 +886,7 @@ public class BigWarp< T >
 
 		System.out.println( "bigWarp transform as affine 3d: " + bigWarpTransform.toString() );
 
-		movingSpimData.getViewRegistrations().getViewRegistration( 0, 0 ).preconcatenateTransform( 
+		movingSpimData.getViewRegistrations().getViewRegistration( 0, 0 ).preconcatenateTransform(
 				new ViewTransformAffine( "Big Warp: " + bwTransform.getTransformType(), bigWarpTransform ) );
 
 		File proposedFile;
@@ -957,15 +997,15 @@ public class BigWarp< T >
 		final GenericDialogPlus gd = new GenericDialogPlus( "Apply Big Warp transform" );
 
 		gd.addMessage( "Field of view and resolution:" );
-		gd.addChoice( "Resolution", 
+		gd.addChoice( "Resolution",
 				new String[]{ ApplyBigwarpPlugin.TARGET, ApplyBigwarpPlugin.MOVING, ApplyBigwarpPlugin.SPECIFIED },
 				ApplyBigwarpPlugin.TARGET );
 
-		gd.addChoice( "Field of view", 
-				new String[]{ ApplyBigwarpPlugin.TARGET, 
+		gd.addChoice( "Field of view",
+				new String[]{ ApplyBigwarpPlugin.TARGET,
 						ApplyBigwarpPlugin.MOVING_WARPED,
 						ApplyBigwarpPlugin.UNION_TARGET_MOVING,
-						ApplyBigwarpPlugin.LANDMARK_POINTS, 
+						ApplyBigwarpPlugin.LANDMARK_POINTS,
 						ApplyBigwarpPlugin.LANDMARK_POINT_CUBE_PIXEL,
 						ApplyBigwarpPlugin.LANDMARK_POINT_CUBE_PHYSICAL,
 						ApplyBigwarpPlugin.SPECIFIED_PIXEL,
@@ -974,25 +1014,25 @@ public class BigWarp< T >
 				ApplyBigwarpPlugin.TARGET );
 
 		gd.addStringField( "point filter", "" );
-		
+
 		gd.addMessage( "Resolution");
 		gd.addNumericField( "x", 1.0, 4 );
 		gd.addNumericField( "y", 1.0, 4 );
 		gd.addNumericField( "z", 1.0, 4 );
-		
+
 		gd.addMessage( "Offset");
 		gd.addNumericField( "x", 0.0, 4 );
 		gd.addNumericField( "y", 0.0, 4 );
 		gd.addNumericField( "z", 0.0, 4 );
-		
+
 		gd.addMessage( "Field of view");
 		gd.addNumericField( "x", -1, 0 );
 		gd.addNumericField( "y", -1, 0 );
 		gd.addNumericField( "z", -1, 0 );
-		
+
 		gd.addMessage( "Other Output options");
 		gd.addChoice( "Interpolation", new String[]{ "Nearest Neighbor", "Linear" }, "Linear" );
-		
+
 		gd.addMessage( "Virtual: fast to display,\n"
 				+ "low memory requirements,\nbut slow to navigate" );
 		gd.addCheckbox( "virtual?", false );
@@ -1015,21 +1055,21 @@ public class BigWarp< T >
 
 		if ( gd.wasCanceled() )
 			return;
-		
+
 		final String resolutionOption = gd.getNextChoice();
 		final String fieldOfViewOption = gd.getNextChoice();
 		final String fieldOfViewPointFilter = gd.getNextString();
-		
+
 		final double[] resolutionSpec = new double[ 3 ];
 		resolutionSpec[ 0 ] = gd.getNextNumber();
 		resolutionSpec[ 1 ] = gd.getNextNumber();
 		resolutionSpec[ 2 ] = gd.getNextNumber();
-		
+
 		final double[] offsetSpec = new double[ 3 ];
 		offsetSpec[ 0 ] = gd.getNextNumber();
 		offsetSpec[ 1 ] = gd.getNextNumber();
 		offsetSpec[ 2 ] = gd.getNextNumber();
-		
+
 		final double[] fovSpec = new double[ 3 ];
 		fovSpec[ 0 ] = gd.getNextNumber();
 		fovSpec[ 1 ] = gd.getNextNumber();
@@ -1058,7 +1098,7 @@ public class BigWarp< T >
 
 		final double[] res = ApplyBigwarpPlugin.getResolution( this.data, resolutionOption, resolutionSpec );
 
-		final List<Interval> outputIntervalList = ApplyBigwarpPlugin.getPixelInterval( this.data, 
+		final List<Interval> outputIntervalList = ApplyBigwarpPlugin.getPixelInterval( this.data,
 				this.landmarkModel, this.currentTransform,
 				fieldOfViewOption, fieldOfViewPointFilter, bboxOptions, fovSpec, offsetSpec, res );
 
@@ -1071,7 +1111,7 @@ public class BigWarp< T >
 		// landmark centers (because multiple images can be exported this way )
 		if( matchedPtNames.size() > 0 )
 		{
-			BigwarpLandmarkSelectionPanel<T> selection = new BigwarpLandmarkSelectionPanel<>( 
+			BigwarpLandmarkSelectionPanel<T> selection = new BigwarpLandmarkSelectionPanel<>(
 					data, sources, fieldOfViewOption,
 					outputIntervalList, matchedPtNames, interp,
 					offsetSpec, res, isVirtual, nThreads,
@@ -1090,21 +1130,21 @@ public class BigWarp< T >
 						progressWriter.setProgress( 0.01 );
 						ApplyBigwarpPlugin.runN5Export( data, sources, fieldOfViewOption,
 								outputIntervalList.get( 0 ), interp,
-								offsetSpec, res, unit, 
-								progressWriter, writeOpts, 
+								offsetSpec, res, unit,
+								progressWriter, writeOpts,
 								Executors.newFixedThreadPool( nThreads )  );
 
 						progressWriter.setProgress( 1.00 );
 					}
 				}.start();
 			}
-			else 
+			else
 			{
 				// export
 				final boolean show = ( writeOpts.pathOrN5Root == null  || writeOpts.pathOrN5Root.isEmpty() );
 				ApplyBigwarpPlugin.runExport( data, sources, fieldOfViewOption,
 						outputIntervalList, matchedPtNames, interp,
-						offsetSpec, res, isVirtual, nThreads, 
+						offsetSpec, res, isVirtual, nThreads,
 						progressWriter, show, false, writeOpts );
 			}
 		}
@@ -1297,7 +1337,7 @@ public class BigWarp< T >
 	}
 
 	public static void updateRowSelection(
-			LandmarkTableModel landmarkModel, JTable table, 
+			LandmarkTableModel landmarkModel, JTable table,
 			boolean isMoving, int lastRowEdited )
 	{
 		logger.trace( "updateRowSelection " );
@@ -1313,7 +1353,7 @@ public class BigWarp< T >
 
 	/**
 	 * Returns the index of the selected row, if it is unpaired, -1 otherwise
-	 * 
+	 *
 	 * @param isMoving isMoving
 	 * @return index of the selected row
 	 */
@@ -1358,14 +1398,14 @@ public class BigWarp< T >
 	{
 		final boolean isWarped = ( isMoving && landmarkModel.getTransform() != null && BigWarp.this.isMovingDisplayTransformed() );
 
-		InvertibleRealTransform transform; 
+		InvertibleRealTransform transform;
 		if( options.values.is2D()  && currentTransform != null )
 			transform = ((Wrapped2DTransformAs3D)currentTransform).getTransform();
 		else
 			transform = currentTransform;
 
 		// TODO check this (current transform part)
-		final boolean didAdd = BigWarp.this.landmarkModel.pointEdit( -1, ptarray, false, isMoving, isWarped, true, transform ); 
+		final boolean didAdd = BigWarp.this.landmarkModel.pointEdit( -1, ptarray, false, isMoving, isWarped, true, transform );
 
 		if ( BigWarp.this.landmarkFrame.isVisible() )
 		{
@@ -1382,12 +1422,12 @@ public class BigWarp< T >
 	/**
 	 * Returns the index of the landmark closest to the input point,
 	 * if it is within a certain distance threshold.
-	 * 
+	 *
 	 * Updates the global variable ptBack
 	 *
 	 * @param pt the point location
 	 * @param isMoving is the point location in moving image space
-	 * @param selectInTable also select the landmark in the table 
+	 * @param selectInTable also select the landmark in the table
 	 * @return the index of the selected landmark
 	 */
 	protected int selectedLandmark( final double[] pt, final boolean isMoving, final boolean selectInTable )
@@ -1511,7 +1551,7 @@ public class BigWarp< T >
 	}
 
 	/**
-	 * Changes the view transformation of 'panelToChange' to match that of 'panelToMatch' 
+	 * Changes the view transformation of 'panelToChange' to match that of 'panelToMatch'
 	 * @param panelToChange the viewer panel whose transform will change
 	 * @param panelToMatch the viewer panel the transform will come from
 	 */
@@ -1519,7 +1559,7 @@ public class BigWarp< T >
 	{
 		panelToChange.showMessage( "Aligning" );
 		panelToMatch.showMessage( "Matching alignment" );
-	
+
 		// get the transform from panelToMatch
 		final AffineTransform3D viewXfm = new AffineTransform3D();
 		panelToMatch.state().getViewerTransform( viewXfm );
@@ -1705,13 +1745,13 @@ public class BigWarp< T >
 	/**
 	 * Toggles whether the moving image is displayed after warping (in the same
 	 * space as the fixed image), or in its native space.
-	 * 
+	 *
 	 * @return true of the display mode changed
 	 */
 	public boolean toggleMovingImageDisplay()
 	{
 		// If this is the first time calling the toggle, there may not be enough
-		// points to estimate a reasonable transformation.  
+		// points to estimate a reasonable transformation.
 		// return early if an re-estimation did not occur
 		boolean success = restimateTransformation();
 		logger.trace( "toggleMovingImageDisplay, success: " + success );
@@ -2152,7 +2192,7 @@ public class BigWarp< T >
 
 		wmSrc.setWarp( transform );
 		fitBaselineWarpMagModel();
-	
+
 		if( transform instanceof ThinplateSplineTransform )
 		{
 			jdSrc.setTransform( (ThinplateSplineTransform)transform );
@@ -2277,8 +2317,11 @@ public class BigWarp< T >
 
 	public static void main( final String[] args )
 	{
+		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
+		UIUtils.installFlatLafInfos();
+
 		new ImageJ();
-		
+
 		// TODO main
 		String fnP = "";
 		String fnQ = "";
@@ -2321,7 +2364,7 @@ public class BigWarp< T >
 
 			ProgressWriterIJ progress = new ProgressWriterIJ();
 			BigWarp<?> bw;
-			BigWarpData<?> bwdata; 
+			BigWarpData<?> bwdata;
 			if ( fnP.endsWith( "xml" ) && fnQ.endsWith( "xml" ) )
 			{
 				bwdata = BigWarpInit.createBigWarpDataFromXML( fnP, fnQ );
@@ -2356,7 +2399,7 @@ public class BigWarp< T >
 				}
 			}
 
-			
+
 			if ( !fnLandmarks.isEmpty() )
 				bw.getLandmarkPanel().getTableModel().load( new File( fnLandmarks ) );
 
@@ -2370,7 +2413,7 @@ public class BigWarp< T >
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void viewerXfmTest()
 	{
 		AffineTransform3D srcTransform0 = new AffineTransform3D();
@@ -2451,7 +2494,7 @@ public class BigWarp< T >
 
 			this.movingSourceIndexList = new ArrayList<>();
 			this.targetSourceIndexList = new ArrayList<>();
-			
+
 
 			if ( cache == null )
 				this.cache = new CacheControl.Dummy();
@@ -2497,7 +2540,7 @@ public class BigWarp< T >
 					}
 					else
 					{
-						final int timepoint = state.getCurrentTimepoint();	
+						final int timepoint = state.getCurrentTimepoint();
 						final Bounds bounds = InitializeViewerState.estimateSourceRange( sac.getSpimSource(), timepoint, 0.001, 0.999 );
 						ConverterSetup cs = setups.getConverterSetup(sac);
 						if( cs != null )
@@ -2618,7 +2661,7 @@ public class BigWarp< T >
 			// shift when
 			boolean isMovingLocal = isMoving;
 			if ( e.isShiftDown() && e.isControlDown() )
-			{ 
+			{
 				isMovingLocal = !isMoving;
 			}
 			else if( e.isShiftDown())
@@ -3052,7 +3095,7 @@ public class BigWarp< T >
 						}
 
 						/*
-						 * repaint both panels so that: 
+						 * repaint both panels so that:
 						 * 1) new transform is displayed
 						 * 2) points are rendered
 						 */
@@ -3097,12 +3140,12 @@ public class BigWarp< T >
 				notify();
 			}
 		}
-		
+
 	}
 
 	/**
 	 * Set the folder where the results of auto-saving will be stored.
-	 * 
+	 *
 	 * @param autoSaveFolder the destination folder
 	 */
 	public void setAutosaveFolder( final File autoSaveFolder )
@@ -3145,7 +3188,7 @@ public class BigWarp< T >
 	/**
 	 * Saves landmarks to either the last File the user
 	 * saved landmarks to, or a unique location in the user's bigwarp folder.
-	 * 
+	 *
 	 */
 	public void quickSaveLandmarks()
 	{
@@ -3166,7 +3209,7 @@ public class BigWarp< T >
 
 	/**
 	 * Returns the default location for bigwarp settings / auto saved files: ~/.bigwarp
-	 * @return the folder 
+	 * @return the folder
 	 */
 	public File getBigwarpSettingsFolder()
 	{
@@ -3186,7 +3229,7 @@ public class BigWarp< T >
 
 	/**
 	 * Returns the {@link BigWarpAutoSaver}.
-	 * 
+	 *
 	 * @return
 	 */
 	public BigWarpAutoSaver getAutoSaver()
@@ -3318,7 +3361,7 @@ public class BigWarp< T >
 		final Element autoSaveNode = new Element( "autosave" );
 		final Element autoSaveLocation = new Element( "location" );
 		if( autoSaveDirectory != null )
-			autoSaveLocation.setText( autoSaveDirectory.getAbsolutePath() ); 
+			autoSaveLocation.setText( autoSaveDirectory.getAbsolutePath() );
 		else
 			autoSaveLocation.setText( getBigwarpSettingsFolder().getAbsolutePath() );
 
